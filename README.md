@@ -1,2 +1,3 @@
-# cli
-PHP command-line interface tools for command routing and output.
+# Laucov's Command-Line Interface Tools
+
+PHP command-line interface library with routing and output features.

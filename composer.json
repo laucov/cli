@@ -1,0 +1,23 @@
+{
+    "name": "laucov/cli",
+    "description": "CLI routing and output tools.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Laucov\\Cli\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rafael Covaleski",
+            "email": "covaleski23@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "laravel/pint": "^1.13"
+    }
+}

@@ -21,36 +21,42 @@ final class OutgoingRequestTest extends TestCase
 
     /**
      * @covers ::setArguments
-     * @uses Laucov\Cli\AbstractRequest::getArguments
      */
-    public function testCanSetArguments(): void
+    public function testArgumentsMustBeStrings(): void
     {
-        $input = ['arg1', 'arg2', 'arg3'];
-        $this->assertSame(
-            $this->request,
-            $this->request->setArguments($input),
-        );
-
-        $output = $this->request->getArguments();
-        $this->assertSameSize($input, $output);
-        foreach ($output as $i => $argument) {
-            $this->assertSame($input[$i], $output[$i]);
-        }
-
         $this->expectException(\InvalidArgumentException::class);
         $this->request->setArguments(['arg1', 0, true]);
     }
 
     /**
+     * @covers ::getArguments
+     * @covers ::setArguments
+     */
+    public function testCanSetArguments(): void
+    {
+        // Set and get arguments.
+        $arguments = ['arg1', 'arg2', 'arg3'];
+        $actual_arguments = $this->request
+            ->setArguments($arguments)
+            ->getArguments();
+
+        // Test received arguments.
+        foreach ($arguments as $i => $argument) {
+            $this->assertSame($arguments[$i], $actual_arguments[$i]);
+        }
+        $this->assertSameSize($arguments, $actual_arguments);
+    }
+
+    /**
+     * @covers ::getCommand
      * @covers ::setCommand
-     * @uses Laucov\Cli\AbstractRequest::getCommand
      */
     public function testCanSetCommand(): void
     {
-        $this->assertSame(
-            $this->request,
-            $this->request->setCommand('do-something'),
-        );
-        $this->assertSame('do-something', $this->request->getCommand());
+        // Set and get the command.
+        $command = $this->request
+            ->setCommand('do-something')
+            ->getCommand();
+        $this->assertSame('do-something', $command);
     }
 }

@@ -12,29 +12,71 @@ use PHPUnit\Framework\TestCase;
  */
 final class IncomingRequestTest extends TestCase
 {
-    private IncomingRequest $requestA;
-    private IncomingRequest $requestB;
-    private IncomingRequest $requestC;
-    private IncomingRequest $requestD;
-    private IncomingRequest $requestE;
-
-    protected function setUp(): void
+    /**
+     * Provides request testing parameters.
+     */
+    public function paramProvider(): array
     {
-        // Create with filename only.
-        $arguments = [];
-        $this->requestA = new IncomingRequest($arguments);
-        // Create with filename and command.
-        $arguments = ['script.php'];
-        $this->requestB = new IncomingRequest($arguments);
-        // Create with filename, command and 1 argument.
-        $arguments = ['script.php', 'foo:bar'];
-        $this->requestC = new IncomingRequest($arguments);
-        // Create with filename, command and 2 arguments.
-        $arguments = ['script.php', 'foo:bar', 'arg_1'];
-        $this->requestD = new IncomingRequest($arguments);
-        // Create with filename, command and 2 arguments.
-        $arguments = ['script.php', 'foo:bar', 'arg_1', 'arg_2'];
-        $this->requestE = new IncomingRequest($arguments);
+        return [
+            [
+                [],
+                null,
+                null,
+                [],
+            ],
+            [
+                ['script.php'],
+                'script.php',
+                null,
+                [],
+            ],
+            [
+                ['script.php', 'just-do'],
+                'script.php',
+                'just-do',
+                [],
+            ],
+            [
+                ['script.php', 'just-do', 'it'],
+                'script.php',
+                'just-do',
+                ['it'],
+            ],
+            [
+                ['script.php', 'just-do', 'it', 'now'],
+                'script.php',
+                'just-do',
+                ['it', 'now'],
+            ],
+        ];
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::getArguments
+     * @covers ::getCommand
+     * @covers ::getFilename
+     * @dataProvider paramProvider
+     */
+    public function testCanGetInformation(
+        array $raw_arguments,
+        null|string $filename,
+        null|string $command,
+        array $arguments,
+    ): void {
+        // Create request.
+        $request = new IncomingRequest($raw_arguments);
+
+        // Check filename and command.
+        $this->assertSame($filename, $request->getFilename());
+        $this->assertSame($command, $request->getCommand());
+
+        // Check arguments.
+        $actual_args = $request->getArguments();
+        foreach ($arguments as $i => $arg) {
+            $this->assertSame($arg, $actual_args[$i]);
+        }
+        $this->assertSameSize($arguments, $actual_args);
     }
 
     /**
@@ -44,44 +86,5 @@ final class IncomingRequestTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         new IncomingRequest(['script.php', 123, [], 'argument']);
-    }
-
-    /**
-     * @covers ::getArguments
-     * @uses Laucov\Cli\IncomingRequest::__construct
-     */
-    public function testCanGetArguments(): void
-    {
-        $this->assertSame(count($this->requestA->getArguments()), 0);
-        $this->assertSame(count($this->requestB->getArguments()), 0);
-        $this->assertSame(count($this->requestC->getArguments()), 0);
-        $this->assertSame(count($this->requestD->getArguments()), 1);
-        $this->assertSame(count($this->requestE->getArguments()), 2);
-    }
-
-    /**
-     * @covers ::getCommand
-     * @uses Laucov\Cli\IncomingRequest::__construct
-     */
-    public function testCanGetCommand(): void
-    {
-        $this->assertNull($this->requestA->getCommand());
-        $this->assertNull($this->requestB->getCommand());
-        $this->assertIsString($this->requestC->getCommand());
-        $this->assertIsString($this->requestD->getCommand());
-        $this->assertIsString($this->requestE->getCommand());
-    }
-
-    /**
-     * @covers ::getFilename
-     * @uses Laucov\Cli\IncomingRequest::__construct
-     */
-    public function testCanGetFilename(): void
-    {
-        $this->assertNull($this->requestA->getFilename());
-        $this->assertIsString($this->requestB->getFilename());
-        $this->assertIsString($this->requestC->getFilename());
-        $this->assertIsString($this->requestD->getFilename());
-        $this->assertIsString($this->requestE->getFilename());
     }
 }

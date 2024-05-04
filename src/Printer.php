@@ -73,7 +73,7 @@ class Printer
     public function colorize(string $text, array $colors = []): string
     {
         // Start ANSI escaping.
-        $result = '\e[0';
+        $result = "\e[0";
         foreach ($colors as $color) {
             // Fail if a non-integer color is passed.
             if (!is_int($color)) {
@@ -87,7 +87,7 @@ class Printer
         $result .= 'm';
 
         // Add text and reset colors.
-        $result .= $text . '\e[0m';
+        $result .= $text . "\e[0m";
 
         return $result;
     }

@@ -28,10 +28,8 @@ final class RouterTest extends TestCase
     {
         $this->assertSame(
             $this->router,
-            $this->router->addCommand('valid-class', AbstractCommand::class),
+            $this->router->addCommand('valid-class', ValidCommand::class),
         );
-        $this->expectException(\InvalidArgumentException::class);
-        $this->router->addCommand('invalid-class', \stdClass::class);
     }
 
     /**
@@ -71,4 +69,38 @@ final class RouterTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->router->route(new OutgoingRequest());
     }
+
+    /**
+     * @covers ::addCommand
+     */
+    public function testCommandClassesMustExtendTheAbstractCommandClass(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $message = 'The command class must extend "%s".';
+        $message = sprintf($message, AbstractCommand::class);
+        $this->expectExceptionMessage($message);
+        $this->router->addCommand('invalid-class', InvalidCommand::class);
+    }
+
+    /**
+     * @covers ::addCommand
+     */
+    public function testCommandClassesMustExist(): void
+    {
+        $class_name = 'Foo\Bar\BazCommand';
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage($class_name . ' does not exist.');
+        $this->router->addCommand('inexistent-class', $class_name);
+    }
+}
+
+class ValidCommand extends AbstractCommand
+{
+    public function run(): void
+    {
+    }
+}
+
+class InvalidCommand
+{
 }

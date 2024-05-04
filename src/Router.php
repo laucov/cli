@@ -21,13 +21,22 @@ class Router
      */
     public function addCommand(string $name, string $class_string): static
     {
+        // Check if the command class exist.
+        if (!class_exists($class_string)) {
+            $message = "{$class_string} does not exist.";
+            throw new \InvalidArgumentException($message);
+        }
+
+        // Check if extends the abstract command.
         if (!is_a($class_string, AbstractCommand::class, true)) {
             $class_name = AbstractCommand::class;
             $message = 'The command class must extend "' . $class_name . '".';
             throw new \InvalidArgumentException($message);
         }
 
+        // Set command.
         $this->commands[$name] = $class_string;
+        
         return $this;
     }
 

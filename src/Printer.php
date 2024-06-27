@@ -70,8 +70,20 @@ class Printer
     /**
      * Apply ANSI colors to the given text.
      */
-    public function colorize(string $text, array $colors = []): string
-    {
+    public function colorize(
+        string $text,
+        null|array|TextColor $text_color = null,
+        null|BgColor $bg_color = null,
+    ): string {
+        // Organize colors.
+        $colors = is_array($text_color) ? $text_color : [];
+        if ($text_color !== null && !is_array($text_color)) {
+            $colors[] = $text_color->value;
+        }
+        if ($bg_color !== null) {
+            $colors[] = $bg_color->value;
+        }
+
         // Start ANSI escaping.
         $result = "\e[0";
         foreach ($colors as $color) {
@@ -95,18 +107,24 @@ class Printer
     /**
      * Print the given text using the given colors.
      */
-    public function print(string $text, array $colors = []): static
-    {
-        echo $this->colorize($text, $colors);
+    public function print(
+        string $text,
+        null|array|TextColor $text_color = null,
+        null|BgColor $bg_color = null,
+    ): static {
+        echo $this->colorize($text, $text_color, $bg_color);
         return $this;
     }
 
     /**
      * Print an individual line with the given text using the given colors.
      */
-    public function printLine(string $text, array $colors = []): static
-    {
-        $this->print($text, $colors);
+    public function printLine(
+        string $text,
+        null|array|TextColor $text_color = null,
+        null|BgColor $bg_color = null,
+    ): static {
+        $this->print($text, $text_color, $bg_color);
         echo PHP_EOL;
         return $this;
     }

@@ -9,61 +9,85 @@ class Printer
 {
     /**
      * Blue background color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const BG_BLUE = 44;
 
     /**
      * Cyan background color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const BG_CYAN = 46;
 
     /**
      * Green background color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const BG_GREEN = 42;
 
     /**
      * Magenta background color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const BG_MAGENTA = 45;
 
     /**
      * Red background color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const BG_RED = 41;
 
     /**
      * Yellow background color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const BG_YELLOW = 43;
 
     /**
      * Blue text color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const TEXT_BLUE = 34;
 
     /**
      * Cyan text color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const TEXT_CYAN = 36;
 
     /**
      * Green text color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const TEXT_GREEN = 32;
 
     /**
      * Magenta text color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const TEXT_MAGENTA = 35;
 
     /**
      * Red text color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const TEXT_RED = 31;
 
     /**
      * Yellow text color.
+     * 
+     * @deprecated 2.0.0 Use `TextColor` and `BgColor` enums instead.
      */
     public const TEXT_YELLOW = 33;
 

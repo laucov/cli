@@ -38,7 +38,7 @@ final class AbstractCommandTest extends TestCase
         };
 
         // Run.
-        $this->expectOutputString('\e[0mHello, John!\e[0m' . "\n");
+        $this->expectOutputString("\e[0mHello, John!\e[0m\n");
         $command->run();
     }
 }

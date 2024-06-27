@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Laucov\Cli\BgColor;
 use Laucov\Cli\Printer;
+use Laucov\Cli\TextColor;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,12 +14,10 @@ use PHPUnit\Framework\TestCase;
  */
 final class PrinterTest extends TestCase
 {
+    /**
+     * Printer instance.
+     */
     protected Printer $printer;
-
-    protected function setUp(): void
-    {
-        $this->printer = new Printer();
-    }
 
     /**
      * @covers ::colorize
@@ -39,23 +39,23 @@ final class PrinterTest extends TestCase
             Printer::TEXT_RED,
             Printer::TEXT_YELLOW,
         ];
-
+        
         // Make example text.
         $text = 'Hello, World!';
 
         // Test without colors.
         $result = $this->printer->colorize($text, []);
-        $this->assertSame('\e[0mHello, World!\e[0m', $result);
+        $this->assertSame("\e[0mHello, World!\e[0m", $result);
 
         // Test single color.
         $colors = [Printer::TEXT_RED];
         $result = $this->printer->colorize($text, $colors);
-        $this->assertSame('\e[0;31mHello, World!\e[0m', $result);
+        $this->assertSame("\e[0;31mHello, World!\e[0m", $result);
 
         // Test multiple colors.
         $colors = [Printer::BG_RED, Printer::TEXT_GREEN];
         $result = $this->printer->colorize($text, $colors);
-        $this->assertSame('\e[0;41;32mHello, World!\e[0m', $result);
+        $this->assertSame("\e[0;41;32mHello, World!\e[0m", $result);
 
         // Fail to use non-integer colors.
         $colors = [Printer::BG_RED, 'invalid color'];
@@ -74,18 +74,30 @@ final class PrinterTest extends TestCase
         $colors = [Printer::TEXT_CYAN, Printer::BG_MAGENTA];
         $text = 'Hello, World!';
 
-        // Print with and without line feed.
-        $expected = $this->printer->colorize($text, $colors)
-            . $this->printer->colorize($text, $colors)
-            . PHP_EOL;
-        $this->expectOutputString($expected);
+        // Set output expectations.
+        $this->expectOutputString(<<<SQL
+            \e[0;36;45mHello, World!\e[0m\e[0;36;45mHello, World!\e[0m
+
+            SQL);
+
+        // Print without new line.
         $this->assertSame(
             $this->printer,
             $this->printer->print($text, $colors),
         );
+
+        // Print with new line.
         $this->assertSame(
             $this->printer,
             $this->printer->printLine($text, $colors),
         );
+    }
+
+    /**
+     * This method is called before each test.
+     */
+    protected function setUp(): void
+    {
+        $this->printer = new Printer();
     }
 }

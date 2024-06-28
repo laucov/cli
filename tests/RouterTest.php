@@ -6,10 +6,9 @@ namespace Tests;
 
 use Laucov\Cli\AbstractCommand;
 use Laucov\Cli\AbstractRequest;
-use Laucov\Cli\OutgoingRequest;
+use Laucov\Cli\Interfaces\CommandInterface;
 use Laucov\Cli\Router;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 /**
  * @coversDefaultClass \Laucov\Cli\Router
@@ -30,27 +29,53 @@ final class RouterTest extends TestCase
         $request = $this->createMock(AbstractRequest::class);
 
         // Create parent command.
-        $parent = new class ($request) extends AbstractCommand {
+        $parent = new class ($request) implements CommandInterface {
             public function run(): void
             {
             }
         };
         class_alias($parent::class, 'Tests\BaseCommand');
 
-        // Create command with normal dependencies.
-        $child_a = new class ($request) extends BaseCommand {
+        // Create command with legacy dependencies.
+        $legacy_command = new class ($request) extends BaseCommand {
             public function __construct(AbstractRequest $request)
             {
             }
         };
 
+        // Create command with other dependencies.
+        $command = new class ('a', $request, ['b']) extends BaseCommand {
+            public function __construct(
+                string $some_string,
+                AbstractRequest $request,
+                array $some_array,
+            ) {
+            }
+        };
+
+        // Create command with invalid dependencies.
+        $invalid_command = new class ($request, 2) extends BaseCommand {
+            public function __construct(
+                AbstractRequest $request,
+                int $some_int,
+            ) {
+            }
+        };
+
+        // Create a command with no constructor.
+        $no_constructor = new class extends BaseCommand {};
+
         return [
-            [true, $child_a::class],
+            'legacy command' => [true, $legacy_command::class],
+            'normal command' => [true, $command::class],
+            'invalid command' => [false, $invalid_command::class],
+            'command w/o constructor' => [true, $no_constructor::class],
         ];
     }
 
     /**
      * @covers ::addCommand
+     * @uses Laucov\Cli\Router::__construct
      */
     public function testCanAddCommand(): void
     {
@@ -63,6 +88,7 @@ final class RouterTest extends TestCase
     }
 
     /**
+     * @covers ::__construct
      * @covers ::getCommand
      * @covers ::route
      * @uses Laucov\Cli\AbstractCommand::__construct
@@ -93,12 +119,13 @@ final class RouterTest extends TestCase
 
     /**
      * @covers ::addCommand
+     * @uses Laucov\Cli\Router::__construct
      */
-    public function testCommandClassesMustExtendTheAbstractCommandClass(): void
+    public function testCommandClassesMustImplementTheCommandInterface(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $message = 'The command class must extend "%s".';
-        $message = sprintf($message, AbstractCommand::class);
+        $message = sprintf($message, CommandInterface::class);
         $this->expectExceptionMessage($message);
         $invalid_command = $this->createMock(\stdClass::class);
         $this->router->addCommand('invalid-command', $invalid_command::class);
@@ -106,6 +133,7 @@ final class RouterTest extends TestCase
 
     /**
      * @covers ::addCommand
+     * @uses Laucov\Cli\Router::__construct
      */
     public function testCommandClassesMustExist(): void
     {
@@ -117,6 +145,7 @@ final class RouterTest extends TestCase
 
     /**
      * @covers ::route
+     * @uses Laucov\Cli\Router::__construct
      */
     public function testRequestMustHaveACommandName(): void
     {
@@ -129,17 +158,30 @@ final class RouterTest extends TestCase
     }
 
     /**
-     * @coversNothing
+     * @covers ::addCommand
+     * @covers ::route
+     * @uses Laucov\Cli\Router::__construct
+     * @uses Laucov\Cli\Router::getCommand
      * @dataProvider commandProvider
      */
     public function testValidatesAndResolvesConstructors(
         bool $is_valid,
         string $class_name,
     ): void {
+        // Extend the router.
+        $this->router = new class extends Router {
+            public function __construct()
+            {
+                parent::__construct();
+                $this->dependencies->setValue('string', 'Foobar');
+                $this->dependencies->setValue('array', ['foo', 'bar', 'baz']);
+            }
+        };
+
         // Set up exception expectation.
         if (!$is_valid) {
             $this->expectException(\InvalidArgumentException::class);
-            $message = 'Invalid command constructor parameters.';
+            $message = "{$class_name} has invalid constructor parameters.";
             $this->expectExceptionMessage($message);
         }
 

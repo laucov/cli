@@ -2,10 +2,12 @@
 
 namespace Laucov\Cli;
 
+use Laucov\Cli\Interfaces\CommandInterface;
+
 /**
  * Stores a command's information and procedures.
  */
-abstract class AbstractCommand
+abstract class AbstractCommand implements CommandInterface
 {
     /**
      * Executes the command procedures.

@@ -6,8 +6,10 @@ namespace Tests;
 
 use Laucov\Cli\AbstractCommand;
 use Laucov\Cli\AbstractRequest;
+use Laucov\Cli\OutgoingRequest;
 use Laucov\Cli\Router;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * @coversDefaultClass \Laucov\Cli\Router
@@ -18,6 +20,34 @@ final class RouterTest extends TestCase
      * Router instance.
      */
     protected Router $router;
+
+    /**
+     * Provides command test data.
+     */
+    public function commandProvider(): array
+    {
+        // Create mock.
+        $request = $this->createMock(AbstractRequest::class);
+
+        // Create parent command.
+        $parent = new class ($request) extends AbstractCommand {
+            public function run(): void
+            {
+            }
+        };
+        class_alias($parent::class, 'Tests\BaseCommand');
+
+        // Create command with normal dependencies.
+        $child_a = new class ($request) extends BaseCommand {
+            public function __construct(AbstractRequest $request)
+            {
+            }
+        };
+
+        return [
+            [true, $child_a::class],
+        ];
+    }
 
     /**
      * @covers ::addCommand
@@ -96,6 +126,35 @@ final class RouterTest extends TestCase
             ->willReturn(null);
         $this->expectException(\InvalidArgumentException::class);
         $this->router->route($request);
+    }
+
+    /**
+     * @coversNothing
+     * @dataProvider commandProvider
+     */
+    public function testValidatesAndResolvesConstructors(
+        bool $is_valid,
+        string $class_name,
+    ): void {
+        // Set up exception expectation.
+        if (!$is_valid) {
+            $this->expectException(\InvalidArgumentException::class);
+            $message = 'Invalid command constructor parameters.';
+            $this->expectExceptionMessage($message);
+        }
+
+        // Add command.
+        $this->router->addCommand('do-something', $class_name);
+
+        // Route command.
+        if ($is_valid) {
+            $request = $this->createMock(AbstractRequest::class);
+            $request
+                ->method('getCommand')
+                ->willReturn('do-something');
+            $command = $this->router->route($request);
+            $this->assertInstanceOf($class_name, $command);
+        }
     }
 
     /**

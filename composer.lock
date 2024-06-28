@@ -4,8 +4,50 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9704f60347fa9a7d8502b2e910499fc0",
-    "packages": [],
+    "content-hash": "5f7af1300a8a0290cedf14990573acb9",
+    "packages": [
+        {
+            "name": "laucov/injection",
+            "version": "v1.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laucov/injection.git",
+                "reference": "2302ee1431bb758a01587567ab5fdaa46c9d5fc1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laucov/injection/zipball/2302ee1431bb758a01587567ab5fdaa46c9d5fc1",
+                "reference": "2302ee1431bb758a01587567ab5fdaa46c9d5fc1",
+                "shasum": ""
+            },
+            "require-dev": {
+                "laravel/pint": "^1.13",
+                "phpunit/phpunit": "^9.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Laucov\\Injection\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Rafael Covaleski Pereira",
+                    "email": "rafael.covaleski@laucov.com"
+                }
+            ],
+            "description": "Library for easy dependency injection on callables.",
+            "support": {
+                "issues": "https://github.com/laucov/injection/issues",
+                "source": "https://github.com/laucov/injection/tree/v1.2.4"
+            },
+            "time": "2024-03-21T22:56:06+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "doctrine/instantiator",

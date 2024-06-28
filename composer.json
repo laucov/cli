@@ -15,7 +15,9 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {},
+    "require": {
+        "laucov/injection": "^1.2"
+    },
     "require-dev": {
         "phpunit/phpunit": "^9.6",
         "laravel/pint": "^1.13"

@@ -86,7 +86,7 @@ final class PrinterTest extends TestCase
             Printer::TEXT_RED,
             Printer::TEXT_YELLOW,
         ];
-        
+
         // Make example text.
         $text = 'Hello, World!';
 
@@ -119,7 +119,7 @@ final class PrinterTest extends TestCase
             \e[0mBye.\e[0m
 
             TXT);
-        
+
         // Print.
         $this->printer->printLine('Welcome to our awesome app!');
         $this->printer->print('Blue ', TextColor::BLUE);

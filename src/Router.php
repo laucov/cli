@@ -36,7 +36,7 @@ class Router
 
         // Set command.
         $this->commands[$name] = $class_string;
-        
+
         return $this;
     }
 

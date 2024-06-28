@@ -28,8 +28,7 @@ final class AbstractCommandTest extends TestCase
         $request = new IncomingRequest(['foo.php', 'greet', 'John']);
 
         // Create command.
-        $command = new class ($request) extends AbstractCommand
-        {
+        $command = new class ($request) extends AbstractCommand {
             public function run(): void
             {
                 $name = $this->request->getArguments()[0] ?? '';

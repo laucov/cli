@@ -6,6 +6,7 @@ namespace Tests;
 
 use Laucov\Cli\AbstractCommand;
 use Laucov\Cli\AbstractRequest;
+use Laucov\Cli\Input;
 use Laucov\Cli\Interfaces\CommandInterface;
 use Laucov\Cli\Router;
 use PHPUnit\Framework\TestCase;
@@ -115,6 +116,49 @@ final class RouterTest extends TestCase
             ->method('getCommand')
             ->willReturn('brake-the-router');
         $this->assertNull($this->router->route($request));
+    }
+
+    /**
+     * @covers ::setInput
+     * @uses Laucov\Cli\Router::__construct
+     * @uses Laucov\Cli\Router::addCommand
+     * @uses Laucov\Cli\Router::getCommand
+     * @uses Laucov\Cli\Router::route
+     */
+    public function testCanSetInput(): void
+    {
+        // Mock input object.
+        $input = $this->createMock(Input::class);
+        $input
+            ->expects($this->once())
+            ->method('ask')
+            ->with('Insert your name: ')
+            ->willReturn('John');
+
+        // Create command.
+        $command = new class ($input) implements CommandInterface
+        {
+            public function __construct(protected Input $input)
+            {
+            }
+            public function run(): void
+            {
+                $this->input->ask('Insert your name: ');
+            }
+        };
+
+        // Mock request.
+        $request = $this->createMock(AbstractRequest::class);
+        $request
+            ->method('getCommand')
+            ->willReturn('test');
+        
+        // Set input source and add command.
+        $this->router
+            ->setInput($input)
+            ->addCommand('test', $command::class)
+            ->route($request)
+            ->run();
     }
 
     /**

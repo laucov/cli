@@ -101,6 +101,15 @@ class Router
     }
 
     /**
+     * Set the current input object.
+     */
+    public function setInput(Input $input): static
+    {
+        $this->dependencies->setValue(Input::class, $input);
+        return $this;
+    }
+
+    /**
      * Get the command class name stored under the given name.
      * 
      * @return class-string<AbstractCommand>

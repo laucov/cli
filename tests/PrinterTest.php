@@ -53,7 +53,24 @@ final class PrinterTest extends TestCase
     }
 
     /**
+     * Provides data for testing the printer resource validation features.
+     */
+    public function resourceProvider(): array
+    {
+        $data_file = fopen('data://text/plain,foo', 'r');
+
+        return [
+            'no custom resource' => [true, null],
+            'temporary file' => [true, tmpfile()],
+            'unwritable but valid' => [true, $data_file],
+            'string' => [false, 'foobar'],
+            'array' => [false, [1, 2, ['foo', 'bar']]],
+        ];
+    }
+
+    /**
      * @covers ::colorize
+     * @uses Laucov\Cli\Printer::__construct
      * @dataProvider colorProvider
      */
     public function testCanColorizeText(
@@ -106,8 +123,10 @@ final class PrinterTest extends TestCase
     }
 
     /**
+     * @covers ::output
      * @covers ::print
      * @covers ::printLine
+     * @uses Laucov\Cli\Printer::__construct
      * @uses Laucov\Cli\Printer::colorize
      */
     public function testCanPrintText(): void
@@ -157,7 +176,25 @@ final class PrinterTest extends TestCase
     }
 
     /**
+     * @covers ::__construct
+     * @covers ::output
+     * @uses Laucov\Cli\Printer::colorize
+     * @uses Laucov\Cli\Printer::print
+     * @uses Laucov\Cli\Printer::printLine
+     */
+    public function testCanUseCustomOutput(): void
+    {
+        $file = tmpfile();
+        $printer = new Printer($file);
+        $this->expectOutputString('');
+        $printer->print('I like fries.');
+        fseek($file, 0);
+        $this->assertSame("\e[0mI like fries.\e[0m", fread($file, 1024));
+    }
+
+    /**
      * @covers ::colorize
+     * @uses Laucov\Cli\Printer::__construct
      */
     public function testMustPassValidColorsDeprecated(): void
     {
@@ -165,6 +202,20 @@ final class PrinterTest extends TestCase
         $colors = [Printer::BG_RED, 'invalid color'];
         $this->expectException(\InvalidArgumentException::class);
         $this->printer->colorize('Hello, World!', $colors);
+    }
+
+    /**
+     * @covers ::__construct
+     * @dataProvider resourceProvider
+     */
+    public function testValidateResources(bool $is_valid, mixed $subject): void
+    {
+        if ($is_valid) {
+            $this->expectNotToPerformAssertions();
+        } else {
+            $this->expectException(\InvalidArgumentException::class);
+        }
+        new Printer($subject);
     }
 
     /**

@@ -92,6 +92,25 @@ class Printer
     public const TEXT_YELLOW = 33;
 
     /**
+     * Create the printer instance.
+     * 
+     * @param null|resource $resource File pointer to use as output.
+     */
+    public function __construct(
+        /**
+         * Custom output file pointer.
+         * 
+         * @var null|resource
+         */
+        protected mixed $resource = null,
+    ) {
+        if ($this->resource !== null && !is_resource($this->resource)) {
+            $message = 'Invalid printer custom resource argument.';
+            throw new \InvalidArgumentException($message);
+        }
+    }
+
+    /**
      * Apply ANSI colors to the given text.
      */
     public function colorize(
@@ -136,7 +155,8 @@ class Printer
         null|array|TextColor $text_color = null,
         null|BgColor $bg_color = null,
     ): static {
-        echo $this->colorize($text, $text_color, $bg_color);
+        $message = $this->colorize($text, $text_color, $bg_color);
+        $this->output($message);
         return $this;
     }
 
@@ -149,7 +169,19 @@ class Printer
         null|BgColor $bg_color = null,
     ): static {
         $this->print($text, $text_color, $bg_color);
-        echo PHP_EOL;
+        $this->output(PHP_EOL);
         return $this;
+    }
+
+    /**
+     * Output raw data.
+     */
+    protected function output(string $data): void
+    {
+        if ($this->resource === null) {
+            echo $data;
+        } else {
+            fwrite($this->resource, $data);
+        }
     }
 }

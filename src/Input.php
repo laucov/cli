@@ -21,6 +21,10 @@ class Input
          */
         protected mixed $resource,
     ) {
+        if ($this->resource !== null && !is_resource($this->resource)) {
+            $message = 'Invalid input custom resource argument.';
+            throw new \InvalidArgumentException($message);
+        }
     }
 
     /**

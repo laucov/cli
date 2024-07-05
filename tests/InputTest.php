@@ -13,6 +13,22 @@ use PHPUnit\Framework\TestCase;
 final class InputTest extends TestCase
 {
     /**
+     * Provides data for testing the printer resource validation features.
+     */
+    public function resourceProvider(): array
+    {
+        $data_file = fopen('data://text/plain,foo', 'r');
+
+        return [
+            'no custom resource' => [true, null],
+            'temporary file' => [true, tmpfile()],
+            'unwritable but valid' => [true, $data_file],
+            'string' => [false, 'foobar'],
+            'array' => [false, [1, 2, ['foo', 'bar']]],
+        ];
+    }
+    
+    /**
      * @covers ::__construct
      * @covers ::ask
      * @covers ::readLine
@@ -35,6 +51,20 @@ final class InputTest extends TestCase
         $input = new Input($fp);
         printf('You commanded "%s".', $input->readLine());
         printf('Your name is "%s".', $input->ask('Insert your name:'));
+    }
+
+    /**
+     * @covers ::__construct
+     * @dataProvider resourceProvider
+     */
+    public function testValidateResources(bool $is_valid, mixed $subject): void
+    {
+        if ($is_valid) {
+            $this->expectNotToPerformAssertions();
+        } else {
+            $this->expectException(\InvalidArgumentException::class);
+        }
+        new Input($subject);
     }
 
     /**

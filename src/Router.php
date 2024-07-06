@@ -110,6 +110,15 @@ class Router
     }
 
     /**
+     * Set the current printer object.
+     */
+    public function setPrinter(Printer $printer): static
+    {
+        $this->dependencies->setValue(Printer::class, $printer);
+        return $this;
+    }
+
+    /**
      * Get the command class name stored under the given name.
      * 
      * @return class-string<AbstractCommand>

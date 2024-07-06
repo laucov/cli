@@ -8,6 +8,7 @@ use Laucov\Cli\AbstractCommand;
 use Laucov\Cli\AbstractRequest;
 use Laucov\Cli\Input;
 use Laucov\Cli\Interfaces\CommandInterface;
+use Laucov\Cli\Printer;
 use Laucov\Cli\Router;
 use PHPUnit\Framework\TestCase;
 
@@ -92,13 +93,12 @@ final class RouterTest extends TestCase
      * @covers ::__construct
      * @covers ::getCommand
      * @covers ::route
-     * @uses Laucov\Cli\AbstractCommand::__construct
      * @uses Laucov\Cli\Router::addCommand
      */
     public function testCanRoute(): void
     {
         // Create example command.
-        $command = $this->createMock(AbstractCommand::class);
+        $command = $this->createMock(CommandInterface::class);
 
         // Route with a valid command.
         $request = $this->createMock(AbstractRequest::class);
@@ -120,12 +120,13 @@ final class RouterTest extends TestCase
 
     /**
      * @covers ::setInput
+     * @covers ::setPrinter
      * @uses Laucov\Cli\Router::__construct
      * @uses Laucov\Cli\Router::addCommand
      * @uses Laucov\Cli\Router::getCommand
      * @uses Laucov\Cli\Router::route
      */
-    public function testCanSetInput(): void
+    public function testCanSetInputAndPrinter(): void
     {
         // Mock input object.
         $input = $this->createMock(Input::class);
@@ -134,16 +135,26 @@ final class RouterTest extends TestCase
             ->method('ask')
             ->with('Insert your name: ')
             ->willReturn('John');
+        
+        // Mock printer.
+        $printer = $this->createMock(Printer::class);
+        $printer
+            ->expects($this->once())
+            ->method('printLine')
+            ->with('You inserted John.');
 
         // Create command.
-        $command = new class ($input) implements CommandInterface
+        $command = new class ($input, $printer) implements CommandInterface
         {
-            public function __construct(protected Input $input)
-            {
+            public function __construct(
+                protected Input $input,
+                protected Printer $printer,
+            ) {
             }
             public function run(): void
             {
-                $this->input->ask('Insert your name: ');
+                $name = $this->input->ask('Insert your name: ');
+                $this->printer->printLine(sprintf('You inserted %s.', $name));
             }
         };
 
@@ -156,6 +167,7 @@ final class RouterTest extends TestCase
         // Set input source and add command.
         $this->router
             ->setInput($input)
+            ->setPrinter($printer)
             ->addCommand('test', $command::class)
             ->route($request)
             ->run();

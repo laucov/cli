@@ -31,26 +31,43 @@ final class InputTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::ask
+     * @covers ::askUntil
      * @covers ::readLine
      */
     public function testCanReadInput(): void
     {
-        // Setup input.
         $fp = $this->createInputResource(<<<TXT
             do-something --foo --bar
             John
+            b
+            n
+            si
+            sí
             TXT);
-
-        // Setup expectations.
         $this->expectOutputString(
-            'You commanded "do-something --foo --bar".'
-                . 'Insert your name: Your name is "John".'
+            'Insert your name: '
+                . 'Do it? [y/n] '
+                . 'Invalid option. Insert "y" or "n".' . "\n"
+                . 'Do it? [y/n] '
+                . '¿proceder? '
+                . '¿proceder? ',
         );
-
-        // Test input.
         $input = new Input($fp);
-        printf('You commanded "%s".', $input->readLine());
-        printf('Your name is "%s".', $input->ask('Insert your name:'));
+        $this->assertSame('do-something --foo --bar', $input->readLine());
+        $this->assertSame('John', $input->ask('Insert your name:'));
+        $value = $input->askUntil('Do it? [y/n]', function (string $value) {
+            if (in_array($value, ['y', 'n'], true)) {
+                return true;
+            } else {
+                echo 'Invalid option. Insert "y" or "n".' . PHP_EOL;
+                return false;
+            }
+        });
+        $this->assertSame('n', $value);
+        $value = $input->askUntil('¿proceder?', function (string $value) {
+            return in_array($value, ['sí', 'no'], true);
+        });
+        $this->assertSame('sí', $value);
     }
 
     /**

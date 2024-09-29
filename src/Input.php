@@ -37,6 +37,19 @@ class Input
     }
 
     /**
+     * Request the user to input yes or no.
+     */
+    public function askUntil(string $message, callable $callback): string
+    {
+        for (;;) {
+            $input = $this->ask($message);
+            if (call_user_func($callback, $input)) {
+                return $input;
+            }
+        }
+    }
+
+    /**
      * Read the next user input line.
      */
     public function readLine(): string

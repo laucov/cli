@@ -20,10 +20,14 @@ class Input
          * @var resource
          */
         protected mixed $resource,
+
+        /**
+         * Printer.
+         */
+        protected Printer $printer,
     ) {
-        if ($this->resource !== null && !is_resource($this->resource)) {
-            $message = 'Invalid input custom resource argument.';
-            throw new \InvalidArgumentException($message);
+        if (!is_resource($this->resource)) {
+            throw new \InvalidArgumentException('Invalid input resource.');
         }
     }
 
@@ -32,7 +36,7 @@ class Input
      */
     public function ask(string $message): string
     {
-        echo $message . ' ';
+        $this->printer->print($message . ' ');
         return $this->readLine();
     }
 

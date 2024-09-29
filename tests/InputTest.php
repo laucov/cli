@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests;
 
 use Laucov\Cli\Input;
+use Laucov\Cli\Printer;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,6 +15,11 @@ use PHPUnit\Framework\TestCase;
 final class InputTest extends TestCase
 {
     /**
+     * Printer mock.
+     */
+    protected Printer&MockObject $printer;
+
+    /**
      * Provides data for testing the printer resource validation features.
      */
     public function resourceProvider(): array
@@ -20,9 +27,9 @@ final class InputTest extends TestCase
         $data_file = fopen('data://text/plain,foo', 'r');
 
         return [
-            'no custom resource' => [true, null],
             'temporary file' => [true, tmpfile()],
             'unwritable but valid' => [true, $data_file],
+            'null' => [false, null],
             'string' => [false, 'foobar'],
             'array' => [false, [1, 2, ['foo', 'bar']]],
         ];
@@ -36,7 +43,7 @@ final class InputTest extends TestCase
      */
     public function testCanReadInput(): void
     {
-        $fp = $this->createInputResource(<<<TXT
+        $resource = $this->createInputResource(<<<TXT
             do-something --foo --bar
             John
             b
@@ -44,15 +51,18 @@ final class InputTest extends TestCase
             si
             sí
             TXT);
-        $this->expectOutputString(
-            'Insert your name: '
-                . 'Do it? [y/n] '
-                . 'Invalid option. Insert "y" or "n".' . "\n"
-                . 'Do it? [y/n] '
-                . '¿proceder? '
-                . '¿proceder? ',
-        );
-        $input = new Input($fp);
+        $this->printer
+            ->expects($this->exactly(5))
+            ->method('print')
+            ->withConsecutive(
+                ['Insert your name: '],
+                ['Do it? [y/n] '],
+                ['Do it? [y/n] '],
+                ['¿proceder? '],
+                ['¿proceder? '],
+            );
+        $this->expectOutputString('Invalid option. Insert "y" or "n".' . "\n");
+        $input = new Input($resource, $this->printer);
         $this->assertSame('do-something --foo --bar', $input->readLine());
         $this->assertSame('John', $input->ask('Insert your name:'));
         $value = $input->askUntil('Do it? [y/n]', function (string $value) {
@@ -81,7 +91,7 @@ final class InputTest extends TestCase
         } else {
             $this->expectException(\InvalidArgumentException::class);
         }
-        new Input($subject);
+        new Input($subject, $this->printer);
     }
 
     /**
@@ -94,5 +104,13 @@ final class InputTest extends TestCase
         $data = base64_encode(implode("\n", $lines));
         $filename = "data://text/plain;base64,{$data}";
         return fopen($filename, 'r');
+    }
+
+    /**
+     * This method is called before each test.
+     */
+    protected function setUp(): void
+    {
+        $this->printer = $this->createMock(Printer::class);
     }
 }
